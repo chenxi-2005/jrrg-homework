@@ -1,0 +1,27 @@
+/* AMM Simulation — 简洁样式 */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background-color: #f5f6f8;
+}
+
+.navbar { box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.navbar-brand { font-weight: 600; }
+
+.card {
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    border-radius: 6px;
+}
+
+.card-title { font-weight: 600; font-size: 0.95rem; }
+
+.pool-card { cursor: pointer; }
+.pool-card:hover { border-color: #636efa; }
+
+.table th { font-size: 0.8rem; color: #6c757d; font-weight: 600; }
+.table td { font-size: 0.85rem; }
+
+.footer { border-top: 1px solid #dee2e6; }
+
+.btn { border-radius: 4px; }

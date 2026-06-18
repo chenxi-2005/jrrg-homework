@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}交易 — AMM 仿真系统{% endblock %}
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">代币兑换</h6>
+                <hr>
+                <div class="mb-2">
+                    <label class="form-label small">选择交易池</label>
+                    <select id="swap-pool" class="form-select form-select-sm" onchange="onSwapPoolChange()">
+                        <option value="">请选择...</option>
+                    </select>
+                </div>
+                <!-- Current pool state -->
+                <div id="pool-state" class="small mb-2 p-2 bg-light rounded" style="display:none;">
+                    <strong id="pool-state-pair"></strong> &nbsp;
+                    现货: <strong id="pool-state-price"></strong> &nbsp;
+                    K: <span id="pool-state-k"></span>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">支付</label>
+                    <div class="input-group input-group-sm">
+                        <input type="number" id="swap-amount-in" class="form-control" placeholder="0.0" step="any" oninput="getQuote()">
+                        <select id="swap-token-in" class="form-select" style="max-width:100px;" onchange="updateTokenOutLabel();getQuote();"></select>
+                    </div>
+                </div>
+                <div class="text-center my-2">&darr;</div>
+                <div class="mb-2">
+                    <label class="form-label small">获得 (估算)</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" id="swap-amount-out" class="form-control" placeholder="0.0" readonly>
+                        <span class="input-group-text" id="swap-token-out-label">—</span>
+                    </div>
+                </div>
+                <div id="swap-details" class="small text-muted mb-2" style="display:none;">
+                    <div>手续费: <span id="swap-fee">—</span></div>
+                    <div>价格冲击: <span id="swap-impact">—</span></div>
+                    <div>成交均价: <span id="swap-price">—</span></div>
+                </div>
+                <button class="btn btn-primary btn-sm w-100" onclick="executeSwap()">执行兑换</button>
+                <div id="swap-result" class="mt-2 small"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">储备曲线 x&middot;y = k <small class="text-muted">（交易沿曲线移动）</small></h6>
+                <div id="chart-curve" style="height:380px;"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/trade.js"></script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}池详情 — AMM 仿真系统{% endblock %}
+{% block content %}
+<div class="mb-3">
+    <a href="/" class="btn btn-outline-secondary btn-sm">&larr; 返回概览</a>
+</div>
+
+<h5>交易池: <span id="pool-title" class="text-primary">加载中...</span></h5>
+
+<div class="row g-3 mt-2">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">池信息</h6>
+                <table class="table table-sm" id="pool-info-table">
+                    <tr><td colspan="2" class="text-muted">加载中...</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">储备曲线 (x&middot;y=k)</h6>
+                <div id="chart-curve-detail" style="height:360px;"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-2">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">价格历史</h6>
+                <div id="chart-price-detail" style="height:300px;"></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">LP 持仓</h6>
+                <div id="lp-positions"><span class="text-muted">加载中...</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const poolId = '{{ pool_id }}';
+document.getElementById('pool-title').textContent = poolId;
+
+async function loadPoolDetail() {
+    try {
+        const res = await fetch(`/api/pools/${poolId}`);
+        const pool = await res.json();
+        document.getElementById('pool-info-table').innerHTML = `
+            <tr><td>交易对</td><td><strong>${pool.token_a}/${pool.token_b}</strong></td></tr>
+            <tr><td>${pool.token_a} 储备</td><td>${parseFloat(pool.reserve_a).toLocaleString()}</td></tr>
+            <tr><td>${pool.token_b} 储备</td><td>${parseFloat(pool.reserve_b).toLocaleString()}</td></tr>
+            <tr><td>K 值</td><td>${parseFloat(pool.k).toLocaleString()}</td></tr>
+            <tr><td>现货价格</td><td>1 ${pool.token_a} = <strong>${parseFloat(pool.spot_price).toLocaleString()}</strong> ${pool.token_b}</td></tr>
+            <tr><td>TWAP</td><td>${pool.twap_price ? parseFloat(pool.twap_price).toLocaleString() : 'N/A'}</td></tr>
+            <tr><td>手续费率</td><td>${(parseFloat(pool.fee_rate)*100).toFixed(1)}%</td></tr>
+            <tr><td>LP 总供应</td><td>${parseFloat(pool.total_lp_supply).toLocaleString()}</td></tr>
+            <tr><td>交易次数</td><td>${pool.swap_count}</td></tr>
+        `;
+
+        // --- ECharts: price bar chart ---
+        const priceRes = await fetch(`/api/pools/${poolId}/price-history`);
+        const priceData = await priceRes.json();
+        (function(){
+            var el=document.getElementById('chart-price-detail');if(!el)return;
+            var pc=echarts.init(el);var steps=[],prices=[];
+            var pts=priceData.history||[];
+            for(var i=0;i<pts.length;i++){steps.push(String(pts[i].step));prices.push(pts[i].spot_price);}
+            pc.setOption({tooltip:{trigger:'axis'},grid:{left:55,right:15,top:15,bottom:35},
+                xAxis:{type:'category',data:steps,axisLabel:{fontSize:10}},
+                yAxis:{type:'value',axisLabel:{fontSize:10},splitLine:{lineStyle:{color:'#eee'}}},
+                series:[{type:'bar',data:prices,itemStyle:{color:function(p){return p.dataIndex>0&&p.value>=prices[p.dataIndex-1]?'#00cc96':'#ef553b';}}}]});
+        })();
+
+        // --- ECharts: reserve curve ---
+        const curveRes = await fetch(`/api/pools/${poolId}/reserve-curve`);
+        const curveData = await curveRes.json();
+        (function(){
+            var el=document.getElementById('chart-curve-detail');if(!el)return;
+            var cc=echarts.init(el);
+            var cd2=[];var cps=curveData.curve||[];
+            for(var i=0;i<cps.length;i++)cd2.push([cps[i].reserve_a,cps[i].reserve_b]);
+            cc.setOption({tooltip:{trigger:'item',formatter:function(p){return pool.token_a+': '+p.value[0].toFixed(1)+'<br/>'+pool.token_b+': '+p.value[1].toFixed(1);}},
+                grid:{left:60,right:15,top:20,bottom:40},
+                xAxis:{type:'value',name:pool.token_a+' 储备',nameLocation:'center',nameGap:25,axisLabel:{fontSize:10},splitLine:{lineStyle:{color:'#eee'}}},
+                yAxis:{type:'value',name:pool.token_b+' 储备',nameLocation:'center',nameGap:45,axisLabel:{fontSize:10},splitLine:{lineStyle:{color:'#eee'}}},
+                series:[{type:'line',data:cd2,showSymbol:false,lineStyle:{color:'#636efa',width:2},name:'x*y=k'},
+                    {type:'scatter',data:[[curveData.current.reserve_a,curveData.current.reserve_b]],symbolSize:14,
+                        itemStyle:{color:'#ef553b'},label:{show:true,position:'right',formatter:'当前',fontSize:12,color:'#ef553b'},name:'当前'}]});
+        })();
+
+        const lpDiv = document.getElementById('lp-positions');
+        if (pool.lp_positions && Object.keys(pool.lp_positions).length > 0) {
+            lpDiv.innerHTML = '<table class="table table-sm"><tr><th>用户</th><th>LP 数量</th></tr>' +
+                Object.entries(pool.lp_positions).map(([uid, amt]) =>
+                    `<tr><td>${uid}</td><td>${parseFloat(amt).toLocaleString()}</td></tr>`
+                ).join('') + '</table>';
+        } else {
+            lpDiv.innerHTML = '<span class="text-muted">暂无 LP 持仓</span>';
+        }
+    } catch(e) { console.error(e); }
+}
+loadPoolDetail();
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}流动性 — AMM 仿真系统{% endblock %}
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">添加流动性</h6>
+                <hr>
+                <div class="mb-2">
+                    <label class="form-label small">选择交易池</label>
+                    <select id="add-pool" class="form-select form-select-sm" onchange="onAddPoolChange()">
+                        <option value="">请选择...</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">用户 ID</label>
+                    <input type="text" id="add-user" class="form-control form-control-sm" value="lp_1">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small"><span id="add-label-a">ETH</span> 数量</label>
+                    <input type="number" id="add-amount-a" class="form-control form-control-sm" placeholder="0.0" step="any" oninput="onAmountAInput()">
+                    <small id="add-balance-a" class="text-muted"></small>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small"><span id="add-label-b">USDC</span> 数量</label>
+                    <input type="number" id="add-amount-b" class="form-control form-control-sm" placeholder="0.0" step="any" oninput="onAmountBInput()">
+                    <small id="add-balance-b" class="text-muted"></small>
+                </div>
+                <small class="text-muted">输入一种代币数量，另一种自动按池比例计算</small>
+                <button class="btn btn-success btn-sm w-100 mt-2" onclick="addLiquidity()">添加流动性</button>
+                <div id="add-result" class="mt-2 small"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">移除流动性</h6>
+                <hr>
+                <div class="mb-2">
+                    <label class="form-label small">选择交易池</label>
+                    <select id="remove-pool" class="form-select form-select-sm">
+                        <option value="">请选择...</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">用户 ID</label>
+                    <input type="text" id="remove-user" class="form-control form-control-sm" value="lp_1">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small">销毁 LP 数量</label>
+                    <input type="number" id="remove-lp" class="form-control form-control-sm" placeholder="0.0" step="any">
+                </div>
+                <button class="btn btn-danger btn-sm w-100" onclick="removeLiquidity()">移除流动性</button>
+                <div id="remove-result" class="mt-2 small"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">无常损失曲线</h6>
+                <div id="chart-il" style="height:280px;"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/trade.js"></script>
+{% endblock %}

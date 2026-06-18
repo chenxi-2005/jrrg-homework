@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}概览 — AMM 仿真系统{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>流动性池概览</h4>
+    <button class="btn btn-outline-secondary btn-sm" onclick="refreshAll()">刷新</button>
+</div>
+
+<div id="pool-cards" class="row g-3 mb-4">
+    <div class="col-12 text-center text-muted">加载中...</div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">价格走势</h6>
+                <div id="chart-price" style="height:300px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">储备曲线 (x&middot;y=k)</h6>
+                <div id="chart-curve" style="width:100%;height:280px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h6 class="card-title">仿真摘要</h6>
+        <div id="summary-stats" class="row g-3"><div class="col-12 text-muted">加载中...</div></div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

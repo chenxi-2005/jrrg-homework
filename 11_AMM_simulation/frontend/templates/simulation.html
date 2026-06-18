@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}仿真控制 — AMM 仿真系统{% endblock %}
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h6 class="card-title">仿真控制</h6>
+                <hr>
+                <h3 id="sim-step-display">0 / 50</h3>
+                <small class="text-muted">当前步数 / 总步数</small>
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-success btn-sm" onclick="simAction('run')">运行</button>
+                    <button class="btn btn-primary btn-sm" onclick="simAction('step')">步进 (+1)</button>
+                    <button class="btn btn-danger btn-sm" onclick="simAction('reset')">重置</button>
+                </div>
+                <div id="sim-feedback" class="mt-2 small"></div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title">选择场景</h6>
+                <hr>
+                <div class="mb-2">
+                    <label class="form-label small">典型场景</label>
+                    <select id="scenario-select" class="form-select form-select-sm">
+                        <option value="default">日常交易</option>
+                        <option value="flash_crash">闪崩场景</option>
+                        <option value="arbitrage">跨池套利</option>
+                    </select>
+                </div>
+                <div id="scenario-desc" class="small text-muted mb-2"></div>
+                <button class="btn btn-outline-primary btn-sm w-100" onclick="loadScenario()">加载场景</button>
+                <div class="mb-2 mt-2">
+                    <label class="form-label small">总步数</label>
+                    <input type="number" id="cfg-max-steps" class="form-control form-control-sm" value="50">
+                </div>
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="updateConfig()">应用参数</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">池状态</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>池</th><th>ETH 储备</th><th>USDC 储备</th><th>现货价格</th><th>交易数</th></tr></thead>
+                        <tbody id="sim-pools-body"><tr><td colspan="5" class="text-muted">加载中...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title">价格走势</h6>
+                <div id="chart-sim-price" style="height:250px;"></div></div>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title">事件日志</h6>
+                <div style="max-height:260px;overflow-y:auto;">
+                    <table class="table table-sm table-striped">
+                        <thead><tr><th>步数</th><th>类型</th><th>发起者</th><th>状态</th></tr></thead>
+                        <tbody id="sim-events-body"><tr><td colspan="4" class="text-muted">暂无事件</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/simulation.js"></script>
+{% endblock %}
